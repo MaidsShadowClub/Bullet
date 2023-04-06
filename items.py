@@ -7,6 +7,13 @@ import scrapy
 
 
 class BulletItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
+    cve_id = scrapy.Field()
+    cust_id = scrapy.Field()
+    title = scrapy.Field()
+    links = scrapy.Field()
+    descr = scrapy.Field()
+    affected = scrapy.Field()
+    severity = scrapy.Field()
+    type = scrapy.Field()
+    patch = scrapy.Field()
     pass

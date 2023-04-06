@@ -1,5 +1,5 @@
 import scrapy  # type: ignore
-from BuLLet.items import BulletItem
+from Bullet.items import BulletItem
 
 
 class HuiCVEScaper(scrapy.Spider):

@@ -1,5 +1,5 @@
 import scrapy  # type: ignore
-from BuLLet.items import BulletItem
+from Bullet.items import BulletItem
 
 
 class SamCVEScraper(scrapy.Spider):
@@ -12,6 +12,7 @@ class SamCVEScraper(scrapy.Spider):
         # TODO: add cache check
         # TODO: add existense check
         bullet: scrapy.Selector = response.css("div.acc_sub")[0]
+        print("HUI", bullet)
         vulns = bullet.xpath(".//strong[font[starts-with(text(), 'SVE-')]]")
         for vuln in vulns:
             item = BulletItem()
