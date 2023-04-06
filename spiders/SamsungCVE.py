@@ -12,7 +12,6 @@ class SamCVEScraper(scrapy.Spider):
         # TODO: add cache check
         # TODO: add existense check
         bullet: scrapy.Selector = response.css("div.acc_sub")[0]
-        print("HUI", bullet)
         vulns = bullet.xpath(".//strong[font[starts-with(text(), 'SVE-')]]")
         for vuln in vulns:
             item = BulletItem()
