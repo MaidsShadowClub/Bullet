@@ -2,9 +2,9 @@
 Tool for scraping CVEs for vulnerability research purposes
 
 ## Instruction
-`scrapy crawl SamsungCVE` - scrap Samsung's CVEs
-`scrapy crawl HuaweiCVE` - scrap Huawei's CVEs
-To reduce debug logs add `-s LOG_LEVEL='INFO'` at end of the command
+`scrapy crawl SamsungCVE` - scrap Samsung's CVEs<br>
+`scrapy crawl HuaweiCVE` - scrap Huawei's CVEs<br>
+To reduce debug logs add `-s LOG_LEVEL='INFO'` at end of the command<br>
 
 ### Todo
 - Add db
