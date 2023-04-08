@@ -6,7 +6,13 @@ Tool for scraping CVEs for vulnerability research purposes
 `scrapy crawl HuaweiCVE` - scrap Huawei's CVEs<br>
 To reduce debug logs add `-s LOG_LEVEL='INFO'` at end of the command<br>
 
-### Todo
-- Add db
+## Todo
+### To add
+- Database
 - Export scraped info as PDF
 - Use telegram bot to send bulletin
+
+### Scrapers
+- AppleCVE
+- GPZArticles
+- Conferences?

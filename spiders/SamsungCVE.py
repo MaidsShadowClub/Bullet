@@ -17,7 +17,7 @@ class SamCVEScraper(scrapy.Spider):
 
         @url https://security.samsungmobile.com/securityUpdate.smsb
         @return items
-        @scrapes cve_id cust_id title descr affected severity patch
+        @scrapes cve_id title descr affected severity patch
         @scrapes url project spider server date
         """
         # TODO: add cache check
@@ -32,7 +32,6 @@ class SamCVEScraper(scrapy.Spider):
             item = ItemLoader(BulletCVE(), vuln)
             txt = vuln.get()
             item.add_value("cve_id", txt)
-            item.add_value("cust_id", txt)
             item.add_value("title", txt)
 
             xpath = "../following-sibling::br[1]/following-sibling::text()[%d]"

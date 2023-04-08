@@ -9,6 +9,10 @@ from itemloaders.processors import MapCompose, TakeFirst
 from w3lib.html import remove_tags
 
 
+def get_id(value):
+    return re.findall(r"(CVE-\d*-\d*|SVE-\d*-\d*|LVE-\w*-\d*)", value)
+
+
 def clean_before_semicolon(value):
     useless_words = "([Ii]mpact|[Ss]everity|[Aa]ffected|CVE|SVE)"
     res = re.sub(r"(^.*"+useless_words+r".*:\s*|\s*$)", "", value)
@@ -16,15 +20,9 @@ def clean_before_semicolon(value):
 
 
 class BulletCVE(scrapy.Item):
+    bullet_title = scrapy.Field()
     cve_id = scrapy.Field(
-        input_processor=MapCompose(
-            remove_tags, lambda i: re.search(r"CVE-\d*-\d*", i)),
-        output_processor=TakeFirst()
-    )
-    cust_id = scrapy.Field(
-        input_processor=MapCompose(
-            remove_tags, lambda i: re.search(r"SVE-\d*-\d*", i)),
-        output_processor=TakeFirst()
+        input_processor=MapCompose(remove_tags, get_id)
     )
     title = scrapy.Field(
         input_processor=MapCompose(remove_tags, clean_before_semicolon),

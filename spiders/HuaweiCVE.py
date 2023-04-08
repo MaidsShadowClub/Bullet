@@ -48,5 +48,5 @@ class HuiCVEScraper(scrapy.Spider):
             item.add_value("date", int(time.time()))
 
             i = item.load_item()
-            self.log("%s - %s" % (i["cve_id"][0], i["title"][0]), logging.INFO)
+            self.log("%s - %s" % (i["cve_id"], i["title"]), logging.INFO)
             yield i
