@@ -21,12 +21,15 @@ class HuiCVEScraper(scrapy.Spider):
         @scrapes cve_id title descr affected severity patch
         @scrapes url project spider server date
         """
-
         # TODO: add cache check
         # TODO: add existense check
         # TODO: add third-party library patches
-        vulns = response.xpath(
-            "//div[contains(@class, safe-info-gxq)]/p[contains(@class, 'titile-size') and starts-with(text(), 'CVE-')]")
+        sel = "//div[contains(@class, safe-info-gxq)] \
+                /p[                                   \
+                   contains(@class, 'titile-size')    \
+                   and starts-with(text(), 'CVE-')    \
+                  ]"
+        vulns = response.xpath(sel)
         for vuln in vulns:
             item = ItemLoader(BulletCVE(), vuln)
             txt = vuln.get()

@@ -22,7 +22,11 @@ class SamCVEScraper(scrapy.Spider):
         """
         # TODO: add cache check
         # TODO: add existense check
-        sel = "//div[@class='acc_sub']//strong/font[starts-with(text(), 'SVE-')]"
+        sel = "//div[@class='acc_sub']            \
+               //strong                           \
+                /font[                            \
+                      starts-with(text(), 'SVE-') \
+                     ]"
         vulns: scrapy.Selector = response.xpath(sel)
         for vuln in vulns:
             item = ItemLoader(BulletCVE(), vuln)
