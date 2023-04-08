@@ -10,7 +10,8 @@ from w3lib.html import remove_tags
 
 
 def clean_before_semicolon(value):
-    res = re.sub(r".*:\s*", "", value)
+    useless_words = "([Ii]mpact|[Ss]everity|[Aa]ffected|CVE|SVE)"
+    res = re.sub(r"(^.*"+useless_words+r".*:\s*|\s*$)", "", value)
     return res
 
 
@@ -29,7 +30,9 @@ class BulletCVE(scrapy.Item):
         input_processor=MapCompose(remove_tags, clean_before_semicolon),
     )
     links = scrapy.Field()
-    descr = scrapy.Field()
+    descr = scrapy.Field(
+        input_processor=MapCompose(remove_tags, clean_before_semicolon),
+    )
     affected = scrapy.Field(
         input_processor=MapCompose(remove_tags, clean_before_semicolon),
     )

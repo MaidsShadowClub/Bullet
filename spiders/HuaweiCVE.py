@@ -1,8 +1,12 @@
 import scrapy  # type: ignore
-from Bullet.items import BulletItem
+import logging
+import socket
+import time
+from scrapy.loader import ItemLoader
+from Bullet.items import BulletCVE
 
 
-class HuiCVEScaper(scrapy.Spider):
+class HuiCVEScraper(scrapy.Spider):
     name = "HuaweiCVE"
     # TODO: add last month check
     start_urls = [
@@ -10,27 +14,36 @@ class HuiCVEScaper(scrapy.Spider):
     ]
 
     def parse(self, response: scrapy.http.Response):
+        """ This function parses a huawei security bulletin
+
+        @url https://consumer.huawei.com/en/support/bulletin
+        @return items
+        @scrapes cve_id title descr affected severity patch
+        @scrapes url project spider server date
+        """
+
         # TODO: add cache check
         # TODO: add existense check
         # TODO: add third-party library patches
-        bullet: scrapy.Selector = response.css("div.safe-info-gxq")
-        vulns = bullet.xpath(".//p[contains(@class, 'titile-size') \
-                                   and starts-with(text(), 'CVE-')]")
+        vulns = response.xpath(
+            "//div[contains(@class, safe-info-gxq)]/p[contains(@class, 'titile-size') and starts-with(text(), 'CVE-')]")
         for vuln in vulns:
-            item = BulletItem()
-            item["cve_id"] = vuln.css("::text").re_first(r"CVE-\d{4}-\d{4}")
-            item["cust_id"] = None
-            item["title"] = vuln.css("::text").get().split(":")[1].strip()
-            item["links"] = None
-            item["descr"] = vuln.xpath(
-                "following-sibling::p[3]/text()"
-            ).get().split(":")[1].strip()
-            item["affected"] = vuln.xpath(
-                "following-sibling::p[2]/text()"
-            ).get().split(":")[1].strip()
-            item["severity"] = vuln.xpath(
-                "following-sibling::p[1]/text()"
-            ).get().split(":")[1].strip()
-            item["type"] = None
-            item["patch"] = None
-            yield item
+            item = ItemLoader(BulletCVE(), vuln)
+            txt = vuln.get()
+            item.add_value("cve_id", txt)
+            item.add_value("title", txt)
+
+            xpath = "following-sibling::p[%d]"
+            item.add_xpath("descr", xpath % 3)
+            item.add_xpath("affected", xpath % 2)
+            item.add_xpath("severity", xpath % 1)
+
+            item.add_value("url", response.url)
+            item.add_value("project", self.settings.get("BOT_NAME", "unknown"))
+            item.add_value("spider", self.name)
+            item.add_value("server", socket.gethostname())
+            item.add_value("date", int(time.time()))
+
+            i = item.load_item()
+            self.log("%s - %s" % (i["cve_id"][0], i["title"][0]), logging.INFO)
+            yield i
