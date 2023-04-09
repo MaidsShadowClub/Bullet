@@ -2,16 +2,28 @@ import scrapy  # type: ignore
 import logging
 import socket
 import time
+import datetime
 from scrapy.loader import ItemLoader
 from Bullet.items import BulletCVE
 
 
+def is_valid(value):
+    return True
+
+
 class HuiCVEScraper(scrapy.Spider):
     name = "HuaweiCVE"
-    # TODO: add last month check
-    start_urls = [
-        "https://consumer.huawei.com/en/support/bulletin/2023/4/"
-    ]
+
+    def start_requests(self):
+        url = "https://consumer.huawei.com/en/support/bulletin/%d/%d/"
+        curr_year = datetime.datetime.now().year
+        curr_month = datetime.datetime.now().month
+        for y in range(2021, curr_year+1):
+            for m in range(1, 12+1):
+                if y == curr_year and m > curr_month:
+                    continue
+                link = url % (y, m)
+                yield scrapy.http.Request(link)
 
     def parse(self, response: scrapy.http.Response):
         """ This function parses a huawei security bulletin
@@ -24,6 +36,7 @@ class HuiCVEScraper(scrapy.Spider):
         # TODO: add cache check
         # TODO: add existense check
         # TODO: add third-party library patches
+        bullet_title = response.xpath("//h2[@class='safe-info-title']").get()
         sel = "//div[contains(@class, safe-info-gxq)] \
                 /p[                                   \
                    contains(@class, 'titile-size')    \
@@ -32,6 +45,7 @@ class HuiCVEScraper(scrapy.Spider):
         vulns = response.xpath(sel)
         for vuln in vulns:
             item = ItemLoader(BulletCVE(), vuln)
+            item.add_value("bullet_title", bullet_title)
             txt = vuln.get()
             item.add_value("cve_id", txt)
             item.add_value("title", txt)

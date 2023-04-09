@@ -24,9 +24,7 @@ class GPZArticles(scrapy.Spider):
             "&path=https://googleprojectzero.blogspot.com/%d"
         curr_year = datetime.datetime.now().year
 
-        yield scrapy.http.Request(url % curr_year,
-                                  dont_filter=True,
-                                  callback=self.parse)
+        yield scrapy.http.Request(url % curr_year)
 
     def parse(self, response: scrapy.http.Response):
         """ This function parses a links from archive of blogspot.com

@@ -10,7 +10,8 @@ from w3lib.html import remove_tags
 
 
 def get_id(value):
-    return re.findall(r"(CVE-\d*-\d*|SVE-\d*-\d*|LVE-\w*-\d*)", value)
+    ids = re.findall(r"(CVE-\d*-\d*|SVE-\d*-\d*|LVE-\w*-\d*)", value)
+    return "|".join(ids)
 
 
 def clean_excess_spaces(value):
@@ -19,7 +20,7 @@ def clean_excess_spaces(value):
 
 def clean_before_semicolon(value):
     useless_words = "([Ii]mpact|[Ss]everity|[Aa]ffected|CVE|SVE)"
-    res = re.sub(r"^.*"+useless_words+r".*:\s*", "", value)
+    res = re.sub(r"^.*"+useless_words+r".*[:：]\s*", "", value)
     return res
 
 
@@ -64,8 +65,7 @@ class BulletCVE(scrapy.Item):
 
 class BulletArticle(scrapy.Item):
     title = scrapy.Field(
-        input_processor=MapCompose(
-            remove_tags, clean_excess_spaces),
+        input_processor=MapCompose(remove_tags, clean_excess_spaces),
     )
 
     url = scrapy.Field()
