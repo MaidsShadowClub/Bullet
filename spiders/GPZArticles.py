@@ -29,6 +29,11 @@ class GPZArticles(scrapy.Spider):
                                   callback=self.parse)
 
     def parse(self, response: scrapy.http.Response):
+        """ This function parses a links from archive of blogspot.com
+
+        @url https://googleprojectzero.blogspot.com/?action=getTitles&widgetId=BlogArchive1&widgetType=BlogArchive&responseType=js&path=https://googleprojectzero.blogspot.com/2023
+        @returns requests 1
+        """
         links = re.findall(r"'url':\s*'(https?:\/\/[^\s]+)'",
                            response.body.decode("utf8"))
         for link in links:
@@ -37,6 +42,13 @@ class GPZArticles(scrapy.Spider):
             yield scrapy.http.Request(link, callback=self.parse_item)
 
     def parse_item(self, response: scrapy.http.Response):
+        """ This function parses an articles from blogspot.com
+
+        @url https://googleprojectzero.blogspot.com/2023/03/multiple-internet-to-baseband-remote-rce.html
+        @scrapes title
+        @scrapes url project spider server date
+        @returns items 1
+        """
         item = ItemLoader(BulletArticle(), response=response)
         item.add_xpath(
             "title", "//*[                               \

@@ -16,9 +16,9 @@ class SamCVEScraper(scrapy.Spider):
         """ This function parses a samsung security bulletin
 
         @url https://security.samsungmobile.com/securityUpdate.smsb
-        @return items
         @scrapes cve_id title descr affected severity patch
         @scrapes url project spider server date
+        @return items
         """
         # TODO: add cache check
         # TODO: add existense check
