@@ -1,11 +1,9 @@
-import scrapy  # type: ignore
+import scrapy
 import logging
 import socket
 import time
-import re
 from json import loads
 from scrapy.loader import ItemLoader
-from scrapy.http import Request
 from Bullet.items import BulletCVE
 
 
@@ -15,16 +13,16 @@ def is_valid(value):
     return True
 
 
-class SamCVEScraper(scrapy.Spider):
+class LgCVEScraper(scrapy.Spider):
     name = "LgCVE"
 
     def start_requests(self):
         url = "https://lgsecurity.lge.com:47901/psrt/bltns/selectBltnsAllSMR.do"
-        yield Request(url,
-                      dont_filter=True,
-                      method="POST",
-                      body='{"accessToken": "aa", "langCd": "en"}',
-                      headers={'Content-Type': 'application/json'})
+        yield scrapy.http.Request(url,
+                                  dont_filter=True,
+                                  method="POST",
+                                  body='{"accessToken": "aa", "langCd": "en"}',
+                                  headers={'Content-Type': 'application/json'})
 
     def parse(self, response: scrapy.http.Response):
         """ This function parses a lg security bulletin
@@ -49,11 +47,14 @@ class SamCVEScraper(scrapy.Spider):
                 item.add_value("cve_id", vuln.get("id"))
                 item.add_value("descr", vuln.get("Description"))
                 item.add_value("severity", vuln.get("Severity"))
-                item.add_value("affected", vuln.get("Affected Device Information"))
-                item.add_value("affected", vuln.get("Affected Device information"))
+                item.add_value("affected", vuln.get(
+                    "Affected Device Information"))
+                item.add_value("affected", vuln.get(
+                    "Affected Device information"))
 
                 item.add_value("url", response.url)
-                item.add_value("project", self.settings.get("BOT_NAME", "unknown"))
+                item.add_value("project", self.settings.get(
+                    "BOT_NAME", "unknown"))
                 item.add_value("spider", self.name)
                 item.add_value("server", socket.gethostname())
                 item.add_value("date", int(time.time()))
