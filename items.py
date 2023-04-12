@@ -24,7 +24,15 @@ def clean_before_semicolon(value):
     return res
 
 
-class BulletCVE(scrapy.Item):
+class BulletBase(scrapy.Item):
+    url = scrapy.Field()
+    project = scrapy.Field()
+    spider = scrapy.Field()
+    server = scrapy.Field()
+    date = scrapy.Field()
+
+
+class BulletCVE(BulletBase):
     bullet_title = scrapy.Field(
         input_processor=MapCompose(remove_tags, clean_excess_spaces)
     )
@@ -54,23 +62,11 @@ class BulletCVE(scrapy.Item):
     patch = scrapy.Field(
         input_processor=MapCompose(remove_tags, clean_excess_spaces),
     )
-
-    url = scrapy.Field()
-    project = scrapy.Field()
-    spider = scrapy.Field()
-    server = scrapy.Field()
-    date = scrapy.Field()
     pass
 
 
-class BulletArticle(scrapy.Item):
+class BulletArticle(BulletBase):
     title = scrapy.Field(
         input_processor=MapCompose(remove_tags, clean_excess_spaces),
     )
-
-    url = scrapy.Field()
-    project = scrapy.Field()
-    spider = scrapy.Field()
-    server = scrapy.Field()
-    date = scrapy.Field()
     pass
