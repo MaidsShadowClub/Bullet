@@ -1,7 +1,5 @@
 import scrapy
 import logging
-import socket
-import time
 from json import loads
 from scrapy.loader import ItemLoader
 from Bullet.items import BulletCVE
@@ -17,8 +15,8 @@ class LgCVEScraper(scrapy.Spider):
     name = "LgCVE"
 
     def start_requests(self):
-        url = "https://lgsecurity.lge.com:47901/psrt/bltns/selectBltnsAllSMR.do"
-        yield scrapy.http.Request(url,
+        self.url = "https://lgsecurity.lge.com:47901/psrt/bltns/selectBltnsAllSMR.do"
+        yield scrapy.http.Request(self.url,
                                   dont_filter=True,
                                   method="POST",
                                   body='{"accessToken": "aa", "langCd": "en"}',
@@ -29,7 +27,6 @@ class LgCVEScraper(scrapy.Spider):
 
         @url https://lgsecurity.lge.com:47901/psrt/bltns/selectBltnsAllSMR.do
         @scrapes bullet_title cve_id descr affected severity
-        @scrapes url project spider server date
         @return items
         """
         # TODO: add cache check
@@ -51,13 +48,6 @@ class LgCVEScraper(scrapy.Spider):
                     "Affected Device Information"))
                 item.add_value("affected", vuln.get(
                     "Affected Device information"))
-
-                item.add_value("url", response.url)
-                item.add_value("project", self.settings.get(
-                    "BOT_NAME", "unknown"))
-                item.add_value("spider", self.name)
-                item.add_value("server", socket.gethostname())
-                item.add_value("date", int(time.time()))
 
                 i = item.load_item()
                 self.log("%s - %s" % (i["cve_id"], i["title"]), logging.INFO)

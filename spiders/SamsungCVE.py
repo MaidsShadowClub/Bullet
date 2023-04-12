@@ -1,7 +1,5 @@
 import scrapy  # type: ignore
 import logging
-import socket
-import time
 import datetime
 from scrapy.loader import ItemLoader
 from Bullet.items import BulletCVE
@@ -15,14 +13,14 @@ class SamCVEScraper(scrapy.Spider):
     name = "SamsungCVE"
 
     def start_requests(self):
-        url = "https://security.samsungmobile.com/securityUpdate.smsb"
+        self.url = "https://security.samsungmobile.com/securityUpdate.smsb"
         curr_year = datetime.datetime.now().year
         headers = {
             'Content-Type':
             'application/x-www-form-urlencoded'
         }
         for i in range(2015, curr_year+1):
-            yield scrapy.http.Request(url,
+            yield scrapy.http.Request(self.url,
                                       method="POST",
                                       headers=headers,
                                       body="year=%d" % i,
@@ -33,7 +31,6 @@ class SamCVEScraper(scrapy.Spider):
 
         @url https://security.samsungmobile.com/securityUpdate.smsb
         @scrapes cve_id title descr affected severity patch
-        @scrapes url project spider server date
         @return items
         """
         # TODO: add cache check
@@ -64,13 +61,6 @@ class SamCVEScraper(scrapy.Spider):
                 item.add_xpath("affected", xpath % 2)
                 item.add_xpath("descr", xpath % 5)
                 item.add_xpath("patch", xpath % 6)
-
-                item.add_value("url", response.url)
-                item.add_value("project", self.settings.get(
-                    "BOT_NAME", "unknown"))
-                item.add_value("spider", self.name)
-                item.add_value("server", socket.gethostname())
-                item.add_value("date", int(time.time()))
 
                 i = item.load_item()
                 self.log("%s - %s" % (i["cve_id"], i["title"]), logging.INFO)

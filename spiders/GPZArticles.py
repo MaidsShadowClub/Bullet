@@ -1,7 +1,5 @@
 import scrapy  # type: ignore
 import logging
-import socket
-import time
 import datetime
 import re
 from scrapy.loader import ItemLoader
@@ -16,15 +14,17 @@ class GPZArticles(scrapy.Spider):
     name = "GPZArticles"
 
     def start_requests(self):
-        url = "https://googleprojectzero.blogspot.com/" +\
-            "?action=getTitles" +\
-            "&widgetId=BlogArchive1" +\
-            "&widgetType=BlogArchive" +\
-            "&responseType=js" +\
-            "&path=https://googleprojectzero.blogspot.com/%d"
         curr_year = datetime.datetime.now().year
+        self.url = ("{domain}/" +
+                    "?action=getTitles" +
+                    "&widgetId=BlogArchive1" +
+                    "&widgetType=BlogArchive" +
+                    "&responseType=js" +
+                    "&path={domain}/{year}").format(
+            domain="https://googleprojectzero.blogspot.com",
+            year=curr_year)
 
-        yield scrapy.http.Request(url % curr_year)
+        yield scrapy.http.Request(self.url)
 
     def parse(self, response: scrapy.http.Response):
         """ This function parses a links from archive of blogspot.com
@@ -44,7 +44,6 @@ class GPZArticles(scrapy.Spider):
 
         @url https://googleprojectzero.blogspot.com/2023/03/multiple-internet-to-baseband-remote-rce.html
         @scrapes title
-        @scrapes url project spider server date
         @returns items 1
         """
         item = ItemLoader(BulletArticle(), response=response)
@@ -54,12 +53,6 @@ class GPZArticles(scrapy.Spider):
                           contains(@class, 'post-title') \
                          ]/text()")
 
-        item.add_value("url", response.url)
-        item.add_value("project", self.settings.get("BOT_NAME", "unknown"))
-        item.add_value("spider", self.name)
-        item.add_value("server", socket.gethostname())
-        item.add_value("date", int(time.time()))
-
         i = item.load_item()
-        self.log("%s - %s" % (i["title"], i["url"]), logging.INFO)
+        self.log("%s" % (i["title"]), logging.INFO)
         yield i
