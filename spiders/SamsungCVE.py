@@ -1,4 +1,4 @@
-import scrapy  # type: ignore
+import scrapy
 import logging
 import datetime
 from scrapy.loader import ItemLoader
@@ -36,7 +36,6 @@ class SamCVEScraper(scrapy.Spider):
         @return items
         """
         # TODO: add cache check
-        # TODO: add existense check
         vulns: scrapy.Selector
         bullet_title: scrapy.Selector
 

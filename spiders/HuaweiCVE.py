@@ -1,4 +1,4 @@
-import scrapy  # type: ignore
+import scrapy
 import logging
 import datetime
 from scrapy.loader import ItemLoader
@@ -32,7 +32,6 @@ class HuiCVEScraper(scrapy.Spider):
         @return items
         """
         # TODO: add cache check
-        # TODO: add existense check
         # TODO: add third-party library patches
         bullet_title = response.xpath("//h2[@class='safe-info-title']").get()
         sel = "//div[contains(@class, safe-info-gxq)] \

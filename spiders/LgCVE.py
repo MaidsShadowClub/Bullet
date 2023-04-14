@@ -42,7 +42,6 @@ class LgCVEScraper(scrapy.Spider):
         @return items
         """
         # TODO: add cache check
-        # TODO: add existense check
         bullets = loads(response.body)["res"]
         for bullet in bullets:
             cnt = loads(bullet["contents"])

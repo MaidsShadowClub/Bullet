@@ -1,4 +1,4 @@
-import scrapy  # type: ignore
+import scrapy
 import logging
 import datetime
 import re
@@ -6,7 +6,7 @@ from scrapy.loader import ItemLoader
 from Bullet.items import BulletArticle
 
 
-def is_valid(value):  # stub
+def is_valid(value):
     return True
 
 
