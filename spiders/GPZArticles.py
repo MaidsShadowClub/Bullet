@@ -12,18 +12,16 @@ def is_valid(value):  # stub
 
 class GPZArticles(scrapy.Spider):
     name = "GPZArticles"
+    domain = "googleprojectzero.blogspot.com"
+    link = "https://%s/?action=getTitles" +\
+        "&widgetId=BlogArchive1" +\
+        "&widgetType=BlogArchive" +\
+        "&responseType=js" +\
+        "&path=%s/%d"
 
     def start_requests(self):
         curr_year = datetime.datetime.now().year
-        self.url = ("{domain}/" +
-                    "?action=getTitles" +
-                    "&widgetId=BlogArchive1" +
-                    "&widgetType=BlogArchive" +
-                    "&responseType=js" +
-                    "&path={domain}/{year}").format(
-            domain="https://googleprojectzero.blogspot.com",
-            year=curr_year)
-
+        self.url = self.link % (self.domain, self.domain, curr_year)
         yield scrapy.http.Request(self.url)
 
     def parse(self, response: scrapy.http.Response):

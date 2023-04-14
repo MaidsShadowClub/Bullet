@@ -11,11 +11,23 @@ def is_valid(value):
     return True
 
 
+# key "affected device information" have two different cases
+# so get_elem used
+def get_elem(data, key):
+    ret = []
+    for k in iter(data):
+        if key.lower() == k.lower():
+            ret.append(data[k])
+    return ret
+
+
 class LgCVEScraper(scrapy.Spider):
     name = "LgCVE"
+    domain = "lgsecurity.lge.com"
+    link = "https://%s:47901/psrt/bltns/selectBltnsAllSMR.do"
 
     def start_requests(self):
-        self.url = "https://lgsecurity.lge.com:47901/psrt/bltns/selectBltnsAllSMR.do"
+        self.url = self.link % self.domain
         yield scrapy.http.Request(self.url,
                                   dont_filter=True,
                                   method="POST",
@@ -26,7 +38,7 @@ class LgCVEScraper(scrapy.Spider):
         """ This function parses a lg security bulletin
 
         @url https://lgsecurity.lge.com:47901/psrt/bltns/selectBltnsAllSMR.do
-        @scrapes bullet_title cve_id descr affected severity
+        @scrapes bullet_title cve_names description affected severity
         @return items
         """
         # TODO: add cache check
@@ -39,16 +51,15 @@ class LgCVEScraper(scrapy.Spider):
                     continue
 
                 item = ItemLoader(BulletCVE())
-                item.add_value("bullet_title", cnt["title"])
+                item.add_value("bullet_title", get_elem(bullet, "title"))
                 item.add_value("title", "LG Mobile Security")
-                item.add_value("cve_id", vuln.get("id"))
-                item.add_value("descr", vuln.get("Description"))
-                item.add_value("severity", vuln.get("Severity"))
-                item.add_value("affected", vuln.get(
-                    "Affected Device Information"))
-                item.add_value("affected", vuln.get(
-                    "Affected Device information"))
+                item.add_value("cve_names", get_elem(vuln, "id"))
+                item.add_value("description", get_elem(vuln, "description"))
+                item.add_value("severity", get_elem(vuln, "severity"))
+                item.add_value("affected",
+                               get_elem(vuln, "affected device information"))
 
                 i = item.load_item()
-                self.log("%s - %s" % (i["cve_id"], i["title"]), logging.INFO)
+                self.log("%s - %s" %
+                         (i["cve_names"], i["title"]), logging.INFO)
                 yield i

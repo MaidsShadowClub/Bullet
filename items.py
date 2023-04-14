@@ -5,17 +5,23 @@
 
 import scrapy
 import re
-from itemloaders.processors import MapCompose, TakeFirst
+from itemloaders.processors import MapCompose
 from w3lib.html import remove_tags
 
 
 def get_id(value):
-    ids = re.findall(r"(CVE-\d*-\d*|SVE-\d*-\d*|LVE-\w*-\d*)", value)
-    return "|".join(ids)
+    ids = re.findall(r"(CVE-\d*[-\d]*|SVE-\d*[-\d]*|LVE-\w*[-\d]*)", value)
+    return ids
 
 
-def clean_excess_spaces(value):
-    return re.sub(r"(^\s*|\s*$)", "", value)
+def format_text(value):
+    # delete spaces at begin and end
+    value = re.sub(r"(^\s*|\s*$)", "", value)
+    # delete NBSP
+    value = re.sub(r"\\x[Aa]0", " ", value)
+    # reduce spaces
+    value = re.sub(r"\s(\s)", "", value)
+    return value
 
 
 def clean_before_semicolon(value):
@@ -34,39 +40,39 @@ class BulletBase(scrapy.Item):
 
 class BulletCVE(BulletBase):
     bullet_title = scrapy.Field(
-        input_processor=MapCompose(remove_tags, clean_excess_spaces)
+        input_processor=MapCompose(remove_tags, format_text)
     )
-    cve_id = scrapy.Field(
+    cve_names = scrapy.Field(
         input_processor=MapCompose(remove_tags, get_id)
-    )
-    cust_id = scrapy.Field(
-        input_processor=MapCompose(remove_tags, get_id),
     )
     title = scrapy.Field(
         input_processor=MapCompose(
-            remove_tags, clean_before_semicolon, clean_excess_spaces),
+            remove_tags, clean_before_semicolon, format_text),
     )
     links = scrapy.Field()
-    descr = scrapy.Field(
-        input_processor=MapCompose(remove_tags, clean_before_semicolon),
+    description = scrapy.Field(
+        input_processor=MapCompose(
+            remove_tags, clean_before_semicolon, format_text),
     )
     affected = scrapy.Field(
-        input_processor=MapCompose(remove_tags, clean_before_semicolon),
+        input_processor=MapCompose(
+            remove_tags, clean_before_semicolon, format_text),
     )
     severity = scrapy.Field(
-        input_processor=MapCompose(remove_tags, clean_before_semicolon),
+        input_processor=MapCompose(
+            remove_tags, clean_before_semicolon, format_text),
     )
-    type = scrapy.Field(
-        input_processor=MapCompose(remove_tags, clean_excess_spaces),
+    type_info = scrapy.Field(
+        input_processor=MapCompose(remove_tags, format_text),
     )
     patch = scrapy.Field(
-        input_processor=MapCompose(remove_tags, clean_excess_spaces),
+        input_processor=MapCompose(remove_tags, format_text),
     )
     pass
 
 
 class BulletArticle(BulletBase):
     title = scrapy.Field(
-        input_processor=MapCompose(remove_tags, clean_excess_spaces),
+        input_processor=MapCompose(remove_tags, format_text),
     )
     pass

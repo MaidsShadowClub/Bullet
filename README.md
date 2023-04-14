@@ -16,7 +16,6 @@ To reduce debug logs add `-s LOG_LEVEL='INFO'` at end of the command<br>
 
 ## Todo
 ### To add
-- Database
 - Export scraped info as PDF
 - Use telegram bot to send bulletin
 

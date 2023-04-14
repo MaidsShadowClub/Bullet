@@ -11,9 +11,11 @@ def is_valid(value):
 
 class SamCVEScraper(scrapy.Spider):
     name = "SamsungCVE"
+    domain = "security.samsungmobile.com"
+    link = "https://%s/securityUpdate.smsb"
 
     def start_requests(self):
-        self.url = "https://security.samsungmobile.com/securityUpdate.smsb"
+        self.url = self.link % self.domain
         curr_year = datetime.datetime.now().year
         headers = {
             'Content-Type':
@@ -30,7 +32,7 @@ class SamCVEScraper(scrapy.Spider):
         """ This function parses a samsung security bulletin
 
         @url https://security.samsungmobile.com/securityUpdate.smsb
-        @scrapes cve_id title descr affected severity patch
+        @scrapes cve_names title description affected severity patch
         @return items
         """
         # TODO: add cache check
@@ -51,7 +53,7 @@ class SamCVEScraper(scrapy.Spider):
                 item = ItemLoader(BulletCVE(), vuln)
                 item.add_value("bullet_title", bullet_title.get())
                 txt = vuln.get()
-                item.add_value("cve_id", txt)
+                item.add_value("cve_names", txt)
                 item.add_value("title", txt)
 
                 xpath = ".." +\
@@ -59,9 +61,10 @@ class SamCVEScraper(scrapy.Spider):
                         "/following-sibling::text()[%d]"
                 item.add_xpath("severity", xpath % 1)
                 item.add_xpath("affected", xpath % 2)
-                item.add_xpath("descr", xpath % 5)
+                item.add_xpath("description", xpath % 5)
                 item.add_xpath("patch", xpath % 6)
 
                 i = item.load_item()
-                self.log("%s - %s" % (i["cve_id"], i["title"]), logging.INFO)
+                self.log("%s - %s" %
+                         (i["cve_names"], i["title"]), logging.INFO)
                 yield i
