@@ -1,3 +1,4 @@
 scrapy
 SQLAlchemy
 mysqlclient
+aiogram==3.0.0b7

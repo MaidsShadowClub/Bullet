@@ -26,3 +26,6 @@ To reduce debug logs add `-s LOG_LEVEL='INFO'` at end of the command<br>
 - MicrosoftCVE (https://www.microsoft.com/en-us/download/confirmation.aspx?id=36982)
 - NvdCVE (https://nvd.nist.gov/)
 - Conferences?
+
+## Thanks
+- @kreophagia - for logo

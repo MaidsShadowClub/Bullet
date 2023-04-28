@@ -6,8 +6,9 @@
 import scrapy
 import socket
 import time
-import Bullet.items as items
-import Bullet.models as bull_db
+
+from Bullet import items
+from Bullet import models
 
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
@@ -33,8 +34,8 @@ class DefaultValuesPipeline:
 
 class BulletSaveArticle:
     def __init__(self):
-        engine = bull_db.db_connect()
-        bull_db.create_table(engine)
+        engine = models.db_connect()
+        models.create_table(engine)
         self.Session = sessionmaker(bind=engine)
 
     def process_item(self, item, spider: scrapy.Spider):
@@ -43,15 +44,15 @@ class BulletSaveArticle:
         if type(item) != items.BulletArticle:
             return item
 
-        stmt = select(bull_db.Article).where(
-            bull_db.Article.title == item["title"]
+        stmt = select(models.Article).where(
+            models.Article.title == item["title"]
         )
         row = session.execute(stmt).first()
         if row is not None:
             session.close()
             raise DropItem("Dublicate Article")
 
-        article = bull_db.Article(
+        article = models.Article(
             title=item["title"],
             url=item["url"],
             project=item["project"],
@@ -69,8 +70,8 @@ class BulletSaveArticle:
 
 class BulletSaveCVE:
     def __init__(self):
-        engine = bull_db.db_connect()
-        bull_db.create_table(engine)
+        engine = models.db_connect()
+        models.create_table(engine)
         self.Session = sessionmaker(bind=engine)
 
     def process_item(self, item, spider: scrapy.Spider):
@@ -78,33 +79,33 @@ class BulletSaveCVE:
 
         if type(item) != items.BulletCVE:
             return item
-        bullet = session.query(bull_db.Bulletin).filter_by(
+        bullet = session.query(models.Bulletin).filter_by(
             title=item["bullet_title"]
         ).first()
         if bullet is None:
-            bullet = bull_db.Bulletin(
+            bullet = models.Bulletin(
                 title=item["bullet_title"]
             )
             session.add(bullet)
             session.commit()
 
         # check if cve_info exists
-        stmt = select(bull_db.CVEInfo).where(
-            bull_db.CVEInfo.description == item["description"],
-            bull_db.CVEInfo.title == item["title"],
-            bull_db.CVEInfo.bulletin_id == bullet.id
+        stmt = select(models.CVEInfo).where(
+            models.CVEInfo.description == item["description"],
+            models.CVEInfo.title == item["title"],
+            models.CVEInfo.bulletin_id == bullet.id
         )
         row = session.execute(stmt).first()
 
         if row is None:
-            cve_info = bull_db.CVEInfo(
+            cve_info = models.CVEInfo(
                 bulletin_id=bullet.id,
                 title=item["title"],
                 links=item["links"],
                 description=item["description"],
                 affected=item["affected"],
                 severity=item["severity"],
-                type_info=item["type_info"],
+                weakness=item["weakness"],
                 patch=item["patch"],
                 url=item["url"],
                 project=item["project"],
@@ -119,16 +120,16 @@ class BulletSaveCVE:
 
         for name in item["cve_names"]:
             # TODO: add refresh after 2 month for Android Bulletin
-            stmt = select(bull_db.CVE).where(
-                bull_db.CVE.bulletin_id == bullet.id,
-                bull_db.CVE.name == name
+            stmt = select(models.CVE).where(
+                models.CVE.bulletin_id == bullet.id,
+                models.CVE.name == name
             )
             row = session.execute(stmt).first()
             if row is not None:
                 session.close()
                 raise DropItem("Dublicate CVE")
 
-            cve = bull_db.CVE(
+            cve = models.CVE(
                 name=name,
                 bulletin_id=bullet.id,
                 cve_info_id=cve_info.id,

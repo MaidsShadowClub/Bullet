@@ -62,7 +62,7 @@ class BulletCVE(BulletBase):
         input_processor=MapCompose(
             remove_tags, clean_before_semicolon, format_text),
     )
-    type_info = scrapy.Field(
+    weakness = scrapy.Field(
         input_processor=MapCompose(remove_tags, format_text),
     )
     patch = scrapy.Field(
