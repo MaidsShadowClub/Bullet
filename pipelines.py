@@ -106,6 +106,7 @@ class BulletSaveCVE:
                 affected=item["affected"],
                 severity=item["severity"],
                 weakness=item["weakness"],
+                reported=item["reported"],
                 patch=item["patch"],
                 url=item["url"],
                 project=item["project"],

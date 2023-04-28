@@ -25,7 +25,7 @@ def format_text(value):
 
 
 def clean_before_semicolon(value):
-    useless_words = "([Ii]mpact|[Ss]everity|[Aa]ffected|CVE|SVE)"
+    useless_words = "([Ii]mpact|[Ss]everity|[Aa]ffected|[Rr]eported|CVE|SVE)"
     res = re.sub(r"^.*"+useless_words+r".*[:：]\s*", "", value)
     return res
 
@@ -49,7 +49,6 @@ class BulletCVE(BulletBase):
         input_processor=MapCompose(
             remove_tags, clean_before_semicolon, format_text),
     )
-    links = scrapy.Field()
     description = scrapy.Field(
         input_processor=MapCompose(
             remove_tags, clean_before_semicolon, format_text),
@@ -62,12 +61,17 @@ class BulletCVE(BulletBase):
         input_processor=MapCompose(
             remove_tags, clean_before_semicolon, format_text),
     )
+    reported = scrapy.Field(
+        input_processor=MapCompose(
+            remove_tags, clean_before_semicolon, format_text),
+    )
     weakness = scrapy.Field(
         input_processor=MapCompose(remove_tags, format_text),
     )
     patch = scrapy.Field(
         input_processor=MapCompose(remove_tags, format_text),
     )
+    links = scrapy.Field()
     pass
 
 

@@ -65,4 +65,5 @@ class CVEInfo(Base, SpiderInfo):
     affected = sa.Column(sa.Text)
     severity = sa.Column(sa.Text)
     weakness = sa.Column(sa.Text)
+    reported = sa.Column(sa.Text)
     patch = sa.Column(sa.Text)

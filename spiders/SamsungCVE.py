@@ -60,6 +60,7 @@ class SamCVEScraper(scrapy.Spider):
                         "/following-sibling::text()[%d]"
                 item.add_xpath("severity", xpath % 1)
                 item.add_xpath("affected", xpath % 2)
+                item.add_xpath("reported", xpath % 3)
                 item.add_xpath("description", xpath % 5)
                 item.add_xpath("patch", xpath % 6)
 

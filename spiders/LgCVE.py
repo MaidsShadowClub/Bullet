@@ -55,6 +55,7 @@ class LgCVEScraper(scrapy.Spider):
                 item.add_value("cve_names", get_elem(vuln, "id"))
                 item.add_value("description", get_elem(vuln, "description"))
                 item.add_value("severity", get_elem(vuln, "severity"))
+                item.add_value("reported", get_elem(vuln, "date reported"))
                 item.add_value("affected",
                                get_elem(vuln, "affected device information"))
 
