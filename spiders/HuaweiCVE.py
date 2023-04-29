@@ -43,6 +43,7 @@ class HuiCVEScraper(scrapy.Spider):
         for vuln in vulns:
             item = ItemLoader(BulletCVE(), vuln)
             item.add_value("bullet_title", bullet_title)
+            item.add_value("timestamp", bullet_title)
             txt = vuln.get()
             item.add_value("cve_names", txt)
             item.add_value("title", txt)

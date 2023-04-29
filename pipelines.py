@@ -36,20 +36,26 @@ class BulletSaveArticle:
     def __init__(self):
         engine = models.db_connect()
         models.create_table(engine)
-        self.Session = sessionmaker(bind=engine)
+        self.db = sessionmaker(bind=engine)()
+
+    def is_dublicate(self, item):
+        title = item["title"]
+
+        query = select(models.Article).where(
+            models.Article.title == title
+        )
+        article = self.db.execute(query).first()
+
+        if article is None:
+            return False
+        return True
 
     def process_item(self, item, spider: scrapy.Spider):
-        session = self.Session()
-
         if type(item) != items.BulletArticle:
             return item
 
-        stmt = select(models.Article).where(
-            models.Article.title == item["title"]
-        )
-        row = session.execute(stmt).first()
-        if row is not None:
-            session.close()
+        if self.is_dublicate(item):
+            self.db.close()
             raise DropItem("Dublicate Article")
 
         article = models.Article(
@@ -61,9 +67,9 @@ class BulletSaveArticle:
             date=item["date"]
         )
 
-        session.add(article)
-        session.commit()
-        session.close()
+        self.db.add(article)
+        self.db.commit()
+        self.db.close()
 
         return item
 
@@ -72,34 +78,62 @@ class BulletSaveCVE:
     def __init__(self):
         engine = models.db_connect()
         models.create_table(engine)
-        self.Session = sessionmaker(bind=engine)
+        self.db = sessionmaker(bind=engine)()
 
-    def process_item(self, item, spider: scrapy.Spider):
-        session = self.Session()
+    def get_vendor(self, item):
+        if item["spider"][-3:] != "CVE":
+            raise DropItem("There is no CVE suffix: " + item["spider"])
 
-        if type(item) != items.BulletCVE:
-            return item
-        bullet = session.query(models.Bulletin).filter_by(
-            title=item["bullet_title"]
-        ).first()
-        if bullet is None:
-            bullet = models.Bulletin(
-                title=item["bullet_title"]
-            )
-            session.add(bullet)
-            session.commit()
+        name = item["spider"][:-3]
+        query = select(models.Vendor).where(
+            models.Vendor.name == name
+        )
+        vendor = self.db.execute(query).first()
 
-        # check if cve_info exists
-        stmt = select(models.CVEInfo).where(
+        if vendor is not None:
+            return vendor[0]
+
+        vendor = models.Vendor(name=name)
+        self.db.add(vendor)
+        self.db.commit()
+        return vendor
+
+    def get_bullet(self, item, vendor):
+        id = vendor.id
+        title = item["bullet_title"]
+        timestamp = item["timestamp"]
+
+        query = select(models.Bulletin).where(
+            models.Bulletin.title == title,
+            models.Bulletin.vendor_id == id
+        )
+        bullet = self.db.execute(query).first()
+
+        if bullet is not None:
+            return bullet[0]
+
+        bullet = models.Bulletin(
+            title=title,
+            vendor_id=id,
+            timestamp=timestamp
+        )
+        self.db.add(bullet)
+        self.db.commit()
+        return bullet
+
+    def get_cve_info(self, item, bullet):
+        id = bullet.id
+
+        query = select(models.CVEInfo).where(
             models.CVEInfo.description == item["description"],
             models.CVEInfo.title == item["title"],
-            models.CVEInfo.bulletin_id == bullet.id
+            models.CVEInfo.bulletin_id == id
         )
-        row = session.execute(stmt).first()
+        row = self.db.execute(query).first()
 
         if row is None:
             cve_info = models.CVEInfo(
-                bulletin_id=bullet.id,
+                bulletin_id=id,
                 title=item["title"],
                 links=item["links"],
                 description=item["description"],
@@ -114,20 +148,37 @@ class BulletSaveCVE:
                 server=item["server"],
                 date=item["date"]
             )
-            session.add(cve_info)
-            session.commit()
+            self.db.add(cve_info)
+            self.db.commit()
         else:
             cve_info = row[0]
+        return cve_info
+
+    def is_cve_dublicate(self, name, bullet):
+        id = bullet.id
+
+        # TODO: add refresh after 2 month for Android Bulletin
+        query = select(models.CVE).where(
+            models.CVE.bulletin_id == id,
+            models.CVE.name == name
+        )
+        row = self.db.execute(query).first()
+
+        if row is None:
+            return False
+        return True
+
+    def process_item(self, item, spider: scrapy.Spider):
+        if type(item) != items.BulletCVE:
+            return item
+
+        vendor = self.get_vendor(item)
+        bullet = self.get_bullet(item, vendor)
+        cve_info = self.get_cve_info(item, bullet)
 
         for name in item["cve_names"]:
-            # TODO: add refresh after 2 month for Android Bulletin
-            stmt = select(models.CVE).where(
-                models.CVE.bulletin_id == bullet.id,
-                models.CVE.name == name
-            )
-            row = session.execute(stmt).first()
-            if row is not None:
-                session.close()
+            if self.is_cve_dublicate(name, bullet):
+                self.db.close()
                 raise DropItem("Dublicate CVE")
 
             cve = models.CVE(
@@ -135,9 +186,8 @@ class BulletSaveCVE:
                 bulletin_id=bullet.id,
                 cve_info_id=cve_info.id,
             )
-            session.add(cve)
-            session.commit()
-
-        session.close()
+            self.db.add(cve)
+            self.db.commit()
+        self.db.close()
 
         return item

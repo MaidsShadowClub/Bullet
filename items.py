@@ -7,9 +7,10 @@ import scrapy
 import re
 from itemloaders.processors import MapCompose
 from w3lib.html import remove_tags
+from datetime import datetime
 
 
-def get_id(value):
+def get_cve_names(value):
     ids = re.findall(r"(CVE-\d*[-\d]*|SVE-\d*[-\d]*|LVE-\w*[-\d]*)", value)
     return ids
 
@@ -30,6 +31,23 @@ def clean_before_semicolon(value):
     return res
 
 
+def convert_to_timestamp(value):
+    ret = None
+
+    # samsung, lg
+    if re.match(r"SMR-\w{3}-\d{4}", value):
+        clear = re.sub("(SMR|-)", " ", value)
+        ret = datetime.strptime(clear, "  %b %Y")
+    # huawei
+    if re.match(r".*EMUI/Magic UI", value):
+        clear = re.sub(".*updates ", "", value)
+        ret = datetime.strptime(clear, "%B %Y")
+    if ret is None:
+        return None
+
+    return int(ret.timestamp())
+
+
 class BulletBase(scrapy.Item):
     url = scrapy.Field()
     project = scrapy.Field()
@@ -43,7 +61,7 @@ class BulletCVE(BulletBase):
         input_processor=MapCompose(remove_tags, format_text)
     )
     cve_names = scrapy.Field(
-        input_processor=MapCompose(remove_tags, get_id)
+        input_processor=MapCompose(remove_tags, get_cve_names)
     )
     title = scrapy.Field(
         input_processor=MapCompose(
@@ -72,6 +90,9 @@ class BulletCVE(BulletBase):
         input_processor=MapCompose(remove_tags, format_text),
     )
     links = scrapy.Field()
+    timestamp = scrapy.Field(
+        input_processor=MapCompose(remove_tags, convert_to_timestamp)
+    )
     pass
 
 

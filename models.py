@@ -27,6 +27,11 @@ class SpiderInfo:
     date = sa.Column(sa.Integer)
 
 
+#                                                                  ┌──────────┐
+#                                                                  │ Articles │
+#                                                                  └──────────┘
+
+
 class Article(Base, SpiderInfo):
     __tablename__ = "article"
 
@@ -34,11 +39,25 @@ class Article(Base, SpiderInfo):
     title = sa.Column(sa.Text)
 
 
+#                                                        ┌────────────────────┐
+#                                                        │ Security bulletins │
+#                                                        └────────────────────┘
+
+class Vendor(Base):
+    __tablename__ = "vendor"
+
+    id = sa.Column(sa.Integer, primary_key=True)
+    name = sa.Column(sa.Text)
+
+
 class Bulletin(Base):
     __tablename__ = "bulletin"
 
     id = sa.Column(sa.Integer, primary_key=True)
     title = sa.Column(sa.Text)
+    timestamp = sa.Column(sa.Integer)
+    vendor = relationship("Vendor")
+    vendor_id = sa.Column(sa.Integer, sa.ForeignKey("vendor.id"))
 
 
 class CVE(Base):
