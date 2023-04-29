@@ -28,7 +28,7 @@ class HuiCVEScraper(scrapy.Spider):
         """ This function parses a huawei security bulletin
 
         @url https://consumer.huawei.com/en/support/bulletin
-        @scrapes cve_names title description affected severity patch
+        @scrapes bullet_title timestamp cve_names title description affected severity patch
         @return items
         """
         # TODO: add cache check

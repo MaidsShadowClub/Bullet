@@ -38,7 +38,7 @@ class LgCVEScraper(scrapy.Spider):
         """ This function parses a lg security bulletin
 
         @url https://lgsecurity.lge.com:47901/psrt/bltns/selectBltnsAllSMR.do
-        @scrapes bullet_title cve_names description reported affected severity
+        @scrapes bullet_title timestamp cve_names description reported affected severity
         @return items
         """
         # TODO: add cache check
