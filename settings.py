@@ -9,9 +9,11 @@
 
 import os
 
+ADMINS = os.getenv("BULLET_TG_BOT_ADMINS").split(",")
+API_TOKEN = os.getenv("BULLET_TG_BOT_TOKEN")
+
 MYSQL_CONNECTION = \
-    "{driver}://{user}:{passwd}@{host}:{port}/{db_name}?charset=utf8".format(
-        driver="mysql",
+    "://{user}:{passwd}@{host}:{port}/{db_name}?charset=utf8mb4".format(
         user=os.getenv("BULLET_SQL_USER"),
         passwd=os.getenv("BULLET_SQL_PASSWD"),
         host="localhost",

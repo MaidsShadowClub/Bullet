@@ -39,12 +39,10 @@ class BulletSaveArticle:
         self.db = sessionmaker(bind=engine)()
 
     def is_dublicate(self, item):
-        title = item["title"]
-
-        query = select(models.Article).where(
-            models.Article.title == title
-        )
-        article = self.db.execute(query).first()
+        article = self.db.execute(
+            select(models.Article)
+            .where(models.Article.title == item["title"])
+        ).first()
 
         if article is None:
             return False
@@ -84,57 +82,54 @@ class BulletSaveCVE:
         if item["spider"][-3:] != "CVE":
             raise DropItem("There is no CVE suffix: " + item["spider"])
 
-        name = item["spider"][:-3]
-        query = select(models.Vendor).where(
-            models.Vendor.name == name
-        )
-        vendor = self.db.execute(query).first()
+        spider_name = item["spider"][:-3]
+        vendor = self.db.execute(
+            select(models.Vendor)
+            .where(models.Vendor.name == spider_name)
+        ).first()
 
         if vendor is not None:
             return vendor[0]
 
-        vendor = models.Vendor(name=name)
+        vendor = models.Vendor(name=spider_name)
         self.db.add(vendor)
         self.db.commit()
         return vendor
 
     def get_bullet(self, item, vendor):
-        id = vendor.id
-        title = item["bullet_title"]
-        timestamp = item["timestamp"]
-
-        query = select(models.Bulletin).where(
-            models.Bulletin.title == title,
-            models.Bulletin.vendor_id == id
-        )
-        bullet = self.db.execute(query).first()
+        bullet = self.db.execute(
+            select(models.Bulletin)
+            .where(
+                models.Bulletin.title == item["bullet_title"],
+                models.Bulletin.vendor_id == vendor.id
+            )
+        ).first()
 
         if bullet is not None:
             return bullet[0]
 
         bullet = models.Bulletin(
-            title=title,
-            vendor_id=id,
-            timestamp=timestamp
+            title=item["bullet_title"],
+            vendor_id=vendor.id,
+            timestamp=item["timestamp"]
         )
         self.db.add(bullet)
         self.db.commit()
         return bullet
 
     def get_cve_info(self, item, bullet):
-        id = bullet.id
+        cve_info = self.db.execute(
+            select(models.CVEInfo).where(
+                models.CVEInfo.description == item["description"],
+                models.CVEInfo.header == item["header"],
+                models.CVEInfo.bulletin_id == bullet.id
+            )
+        ).first()
 
-        query = select(models.CVEInfo).where(
-            models.CVEInfo.description == item["description"],
-            models.CVEInfo.title == item["title"],
-            models.CVEInfo.bulletin_id == id
-        )
-        row = self.db.execute(query).first()
-
-        if row is None:
+        if cve_info is None:
             cve_info = models.CVEInfo(
-                bulletin_id=id,
-                title=item["title"],
+                bulletin_id=bullet.id,
+                header=item["header"],
                 links=item["links"],
                 description=item["description"],
                 affected=item["affected"],
@@ -151,18 +146,17 @@ class BulletSaveCVE:
             self.db.add(cve_info)
             self.db.commit()
         else:
-            cve_info = row[0]
+            cve_info = cve_info[0]
         return cve_info
 
-    def is_cve_dublicate(self, name, bullet):
-        id = bullet.id
-
+    def is_cve_dublicate(self, cve_name, bullet):
         # TODO: add refresh after 2 month for Android Bulletin
-        query = select(models.CVE).where(
-            models.CVE.bulletin_id == id,
-            models.CVE.name == name
-        )
-        row = self.db.execute(query).first()
+        row = self.db.execute(
+            select(models.CVE).where(
+                models.CVE.bulletin_id == bullet.id,
+                models.CVE.name == cve_name
+            )
+        ).first()
 
         if row is None:
             return False

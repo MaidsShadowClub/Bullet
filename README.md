@@ -17,7 +17,6 @@ To reduce debug logs add `-s LOG_LEVEL='INFO'` at end of the command<br>
 ## Todo
 ### To add
 - Export scraped info as PDF
-- Use telegram bot to send bulletin
 
 ### Planned scrapers
 - AppleCVE (https://support.apple.com/en-us/HT201222)
@@ -25,7 +24,10 @@ To reduce debug logs add `-s LOG_LEVEL='INFO'` at end of the command<br>
 - AndroidCVE (https://source.android.com/docs/security/bulletin/asb-overview)
 - MicrosoftCVE (https://www.microsoft.com/en-us/download/confirmation.aspx?id=36982)
 - NvdCVE (https://nvd.nist.gov/)
+- ZDI (https://www.zerodayinitiative.com/blog/)
 - Conferences?
+- Papers?
 
 ## Thanks
 - @kreophagia - for logo
+- @mandico21 - for tgbot template

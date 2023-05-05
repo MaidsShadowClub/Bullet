@@ -1,4 +1,10 @@
 scrapy
 SQLAlchemy
 mysqlclient
+Jinja2
+
+
 aiogram==3.0.0b7
+aiofiles
+asyncmy
+colorlog

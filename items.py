@@ -11,7 +11,14 @@ from datetime import datetime
 
 
 def get_cve_names(value):
-    ids = re.findall(r"(CVE-\d*[-\d]*|SVE-\d*[-\d]*|LVE-\w*[-\d]*)", value)
+    regex = (
+        r"(" +
+        r"CVE-\d{4}-\d*|" +
+        r"SVE-\d{4}-\d*-?\d*|" +
+        r"LVE-\w*-\d{4,6}" +
+        r")"
+    )
+    ids = re.findall(regex, value)
     return ids
 
 
@@ -26,8 +33,19 @@ def format_text(value):
 
 
 def clean_before_semicolon(value):
-    useless_words = "([Ii]mpact|[Ss]everity|[Aa]ffected|[Rr]eported|CVE|SVE)"
-    res = re.sub(r"^.*"+useless_words+r".*[:：]\s*", "", value)
+    excess_words_regex = (
+        r".*" +  # everything before userless words
+        r"(" +
+        r"[Ii]mpact|" +
+        r"[Ss]everity|" +
+        r"[Aa]ffected|" +
+        r"[Rr]eported|" +
+        r"CVE|" +
+        r"SVE" +
+        r")" +
+        r".*[:：]\s*"  # everything after userless words
+    )
+    res = re.sub(excess_words_regex, "", value)
     return res
 
 
@@ -63,7 +81,7 @@ class BulletCVE(BulletBase):
     cve_names = scrapy.Field(
         input_processor=MapCompose(remove_tags, get_cve_names)
     )
-    title = scrapy.Field(
+    header = scrapy.Field(
         input_processor=MapCompose(
             remove_tags, clean_before_semicolon, format_text),
     )

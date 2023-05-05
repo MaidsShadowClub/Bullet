@@ -52,7 +52,7 @@ class LgCVEScraper(scrapy.Spider):
                 item = ItemLoader(BulletCVE())
                 item.add_value("bullet_title", get_elem(bullet, "title"))
                 item.add_value("timestamp", get_elem(bullet, "title"))
-                item.add_value("title", "LG Mobile Security")
+                item.add_value("header", "LG Mobile Security")
                 item.add_value("cve_names", get_elem(vuln, "id"))
                 item.add_value("description", get_elem(vuln, "description"))
                 item.add_value("severity", get_elem(vuln, "severity"))
@@ -62,5 +62,5 @@ class LgCVEScraper(scrapy.Spider):
 
                 i = item.load_item()
                 self.log("%s - %s" %
-                         (i["cve_names"], i["title"]), logging.INFO)
+                         (i["cve_names"], i["header"]), logging.INFO)
                 yield i

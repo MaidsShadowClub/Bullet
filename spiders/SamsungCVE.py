@@ -32,7 +32,7 @@ class SamCVEScraper(scrapy.Spider):
         """ This function parses a samsung security bulletin
 
         @url https://security.samsungmobile.com/securityUpdate.smsb
-        @scrapes bullet_title timestamp cve_names title description affected reported severity patch
+        @scrapes bullet_title timestamp cve_names header description affected reported severity patch
         @return items
         """
         # TODO: add cache check
@@ -54,7 +54,7 @@ class SamCVEScraper(scrapy.Spider):
                 item.add_value("timestamp", bullet_title.get())
                 txt = vuln.get()
                 item.add_value("cve_names", txt)
-                item.add_value("title", txt)
+                item.add_value("header", txt)
 
                 xpath = ".." +\
                         "/following-sibling::br[1]" +\
@@ -67,5 +67,5 @@ class SamCVEScraper(scrapy.Spider):
 
                 i = item.load_item()
                 self.log("%s - %s" %
-                         (i["cve_names"], i["title"]), logging.INFO)
+                         (i["cve_names"], i["header"]), logging.INFO)
                 yield i

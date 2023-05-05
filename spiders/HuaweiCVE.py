@@ -28,7 +28,7 @@ class HuiCVEScraper(scrapy.Spider):
         """ This function parses a huawei security bulletin
 
         @url https://consumer.huawei.com/en/support/bulletin
-        @scrapes bullet_title timestamp cve_names title description affected severity patch
+        @scrapes bullet_title timestamp cve_names header description affected severity patch
         @return items
         """
         # TODO: add cache check
@@ -46,7 +46,7 @@ class HuiCVEScraper(scrapy.Spider):
             item.add_value("timestamp", bullet_title)
             txt = vuln.get()
             item.add_value("cve_names", txt)
-            item.add_value("title", txt)
+            item.add_value("header", txt)
 
             xpath = "following-sibling::p[%d]"
             item.add_xpath("description", xpath % 3)
@@ -54,5 +54,5 @@ class HuiCVEScraper(scrapy.Spider):
             item.add_xpath("severity", xpath % 1)
 
             i = item.load_item()
-            self.log("%s - %s" % (i["cve_names"], i["title"]), logging.INFO)
+            self.log("%s - %s" % (i["cve_names"], i["header"]), logging.INFO)
             yield i
