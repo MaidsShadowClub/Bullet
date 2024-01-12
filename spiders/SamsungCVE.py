@@ -1,41 +1,38 @@
+from typing import Any
+
 import scrapy
 import logging
 import datetime
 from scrapy.loader import ItemLoader
-from Bullet.items import BulletCVE
+from other.items import BulletCVE
 
 
 def is_valid(value):
     return True
 
 
-class SamCVEScraper(scrapy.Spider):
+class SamsungCVEScraper(scrapy.Spider):
     name = "SamsungCVE"
     domain = "security.samsungmobile.com"
     link = "https://%s/securityUpdate.smsb"
 
     def start_requests(self):
-        self.url = self.link % self.domain
+        assert self.name[-3:] == "CVE", f"There is no CVE suffix: {self.name}"
+
+        url = self.link % self.domain
         curr_year = datetime.datetime.now().year
         headers = {
             'Content-Type':
             'application/x-www-form-urlencoded'
         }
         for i in range(2015, curr_year+1):
-            yield scrapy.http.Request(self.url,
+            yield scrapy.http.Request(url,
                                       method="POST",
                                       headers=headers,
                                       body="year=%d" % i,
                                       )
 
-    def parse(self, response: scrapy.http.Response):
-        """ This function parses a samsung security bulletin
-
-        @url https://security.samsungmobile.com/securityUpdate.smsb
-        @scrapes bullet_title timestamp cve_names header description affected reported severity patch
-        @return items
-        """
-        # TODO: add cache check
+    def parse(self, response: scrapy.http.Response, **kwargs: Any) -> Any:
         vulns: scrapy.Selector
         bullet_title: scrapy.Selector
 
@@ -44,9 +41,9 @@ class SamCVEScraper(scrapy.Spider):
             if not is_valid(bullet_title):
                 continue
 
-            sel = "following-sibling::div[1]" +\
-                "//strong" +\
-                "/font[starts-with(text(), 'SVE-')]"
+            sel = ("following-sibling::div[1]"
+                   "//strong"
+                   "/font[starts-with(text(), 'SVE-')]")
             vulns = bullet_title.xpath(sel)
             for vuln in vulns:
                 item = ItemLoader(BulletCVE(), vuln)
