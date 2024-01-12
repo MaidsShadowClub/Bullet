@@ -2,3 +2,7 @@ __pycache__/
 .mypy_cache/
 .idea/
 logs/file/*
+
+# Delete semi-working bot
+bull337_bot.py
+tgbot/
