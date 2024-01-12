@@ -21,7 +21,6 @@ To reduce debug logs add `-s LOG_LEVEL='INFO'` at end of the command<br>
 ### Planned scrapers
 - AppleCVE (https://support.apple.com/en-us/HT201222)
 - QualcommCVE (https://docs.qualcomm.com/product/publicresources/securitybulletin/april-2023-bulletin.html)
-- AndroidCVE (https://source.android.com/docs/security/bulletin/asb-overview)
 - MicrosoftCVE (https://www.microsoft.com/en-us/download/confirmation.aspx?id=36982)
 - NvdCVE (https://nvd.nist.gov/)
 - ZDI (https://www.zerodayinitiative.com/blog/)
