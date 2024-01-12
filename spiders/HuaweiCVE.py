@@ -1,37 +1,34 @@
+from typing import Any
+
 import scrapy
 import logging
 import datetime
 from scrapy.loader import ItemLoader
-from Bullet.items import BulletCVE
+from other.items import BulletCVE
 
 
 def is_valid(value):
     return True
 
 
-class HuiCVEScraper(scrapy.Spider):
+class HuaweiCVEScraper(scrapy.Spider):
     name = "HuaweiCVE"
     domain = "consumer.huawei.com"
     link = "https://%s/en/support/bulletin/%d/%d"
 
     def start_requests(self):
+        assert self.name[-3:] == "CVE", f"There is no CVE suffix: {self.name}"
+
         curr_year = datetime.datetime.now().year
         curr_month = datetime.datetime.now().month
         for y in range(2021, curr_year+1):
             for m in range(1, 12+1):
                 if y == curr_year and m > curr_month:
                     continue
-                self.url = self.link % (self.domain, y, m)
-                yield scrapy.http.Request(self.url)
+                url = self.link % (self.domain, y, m)
+                yield scrapy.http.Request(url)
 
-    def parse(self, response: scrapy.http.Response):
-        """ This function parses a huawei security bulletin
-
-        @url https://consumer.huawei.com/en/support/bulletin
-        @scrapes bullet_title timestamp cve_names header description affected severity patch
-        @return items
-        """
-        # TODO: add cache check
+    def parse(self, response: scrapy.http.Response, **kwargs: Any) -> Any:
         # TODO: add third-party library patches
         bullet_title = response.xpath("//h2[@class='safe-info-title']").get()
         sel = "//div[contains(@class, safe-info-gxq)] \
