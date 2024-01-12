@@ -2,7 +2,7 @@
 Tool for scraping CVEs for vulnerability research purposes
 
 ## Instruction
-### Instalation
+### Installation
 1. `git clone https://github.com/MaidsShadowClub/Bullet`
 2. `cd Bullet`
 3. `pip3 install -r requirements.txt`
@@ -12,7 +12,9 @@ Tool for scraping CVEs for vulnerability research purposes
 `scrapy crawl HuaweiCVE` - scrap Huawei's CVEs<br>
 `scrapy crawl LgCVE` - scrap Lg's CVEs<br>
 `scrapy crawl GPZArticles` - scrap articles from Google Project Zero for current year<br>
-To reduce debug logs add `-s LOG_LEVEL='INFO'` at end of the command<br>
+To change logs level - set `LOG_LEVEL` in setting.py<br>
+
+Just scrap all bulletins: `python main.py`
 
 ## Todo
 ### To add
