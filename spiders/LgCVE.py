@@ -1,8 +1,10 @@
+from typing import Any
+
 import scrapy
 import logging
 from json import loads
 from scrapy.loader import ItemLoader
-from Bullet.items import BulletCVE
+from other.items import BulletCVE
 
 
 def is_valid(value):
@@ -27,21 +29,16 @@ class LgCVEScraper(scrapy.Spider):
     link = "https://%s:47901/psrt/bltns/selectBltnsAllSMR.do"
 
     def start_requests(self):
-        self.url = self.link % self.domain
-        yield scrapy.http.Request(self.url,
+        assert self.name[-3:] == "CVE", f"There is no CVE suffix: {self.name}"
+
+        url = self.link % self.domain
+        yield scrapy.http.Request(url,
                                   dont_filter=True,
                                   method="POST",
                                   body='{"accessToken": "aa", "langCd": "en"}',
                                   headers={'Content-Type': 'application/json'})
 
-    def parse(self, response: scrapy.http.Response):
-        """ This function parses a lg security bulletin
-
-        @url https://lgsecurity.lge.com:47901/psrt/bltns/selectBltnsAllSMR.do
-        @scrapes bullet_title timestamp cve_names description reported affected severity
-        @return items
-        """
-        # TODO: add cache check
+    def parse(self, response: scrapy.http.Response, **kwargs: Any) -> Any:
         bullets = loads(response.body)["res"]
         for bullet in bullets:
             cnt = loads(bullet["contents"])
@@ -57,8 +54,7 @@ class LgCVEScraper(scrapy.Spider):
                 item.add_value("description", get_elem(vuln, "description"))
                 item.add_value("severity", get_elem(vuln, "severity"))
                 item.add_value("reported", get_elem(vuln, "date reported"))
-                item.add_value("affected",
-                               get_elem(vuln, "affected device information"))
+                item.add_value("affected", get_elem(vuln, "affected device information"))
 
                 i = item.load_item()
                 self.log("%s - %s" %
